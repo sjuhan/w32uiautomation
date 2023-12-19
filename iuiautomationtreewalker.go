@@ -44,10 +44,13 @@ func (w *IUIAutomationTreeWalker) GetNextSiblingElement(element *IUIAutomationEl
 	return getNextSiblingElement(w, element)
 }
 
+func (w *IUIAutomationTreeWalker) GetPreviousSiblingElement(element *IUIAutomationElement) (previous *IUIAutomationElement, err error) {
+	return getPreviousSiblingElement(w, element)
+}
+
 func getParentElement(w *IUIAutomationTreeWalker, element *IUIAutomationElement) (parent *IUIAutomationElement, err error) {
-	hr, _, _ := syscall.Syscall(
+	hr, _, _ := syscall.SyscallN(
 		w.VTable().GetParentElement,
-		3,
 		uintptr(unsafe.Pointer(w)),
 		uintptr(unsafe.Pointer(element)),
 		uintptr(unsafe.Pointer(&parent)))
@@ -58,9 +61,8 @@ func getParentElement(w *IUIAutomationTreeWalker, element *IUIAutomationElement)
 }
 
 func getFirstChildElement(w *IUIAutomationTreeWalker, element *IUIAutomationElement) (first *IUIAutomationElement, err error) {
-	hr, _, _ := syscall.Syscall(
+	hr, _, _ := syscall.SyscallN(
 		w.VTable().GetFirstChildElement,
-		3,
 		uintptr(unsafe.Pointer(w)),
 		uintptr(unsafe.Pointer(element)),
 		uintptr(unsafe.Pointer(&first)))
@@ -71,12 +73,23 @@ func getFirstChildElement(w *IUIAutomationTreeWalker, element *IUIAutomationElem
 }
 
 func getNextSiblingElement(w *IUIAutomationTreeWalker, element *IUIAutomationElement) (next *IUIAutomationElement, err error) {
-	hr, _, _ := syscall.Syscall(
+	hr, _, _ := syscall.SyscallN(
 		w.VTable().GetNextSiblingElement,
-		3,
 		uintptr(unsafe.Pointer(w)),
 		uintptr(unsafe.Pointer(element)),
 		uintptr(unsafe.Pointer(&next)))
+	if hr != 0 {
+		err = ole.NewError(hr)
+	}
+	return
+}
+
+func getPreviousSiblingElement(w *IUIAutomationTreeWalker, element *IUIAutomationElement) (previous *IUIAutomationElement, err error) {
+	hr, _, _ := syscall.SyscallN(
+		w.VTable().GetPreviousSiblingElement,
+		uintptr(unsafe.Pointer(w)),
+		uintptr(unsafe.Pointer(element)),
+		uintptr(unsafe.Pointer(&previous)))
 	if hr != 0 {
 		err = ole.NewError(hr)
 	}
